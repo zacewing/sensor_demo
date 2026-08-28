@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boca Raton Tide Tracker</title>
+  <style>
+    :root {
+      --bg-color: #0b132b;
+      --card-bg: #1c2541;
+      --accent: #48cae4;
+      --text-main: #ffffff;
+      --text-sub: #90e0ef;
+      --high-tide: #00b4d8;
+      --low-tide: #ffb703;
+    }
+
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    
+    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Header */
+    header { text-align: center; padding: 10px 0; }
+    h1 { margin: 0; font-size: 1.5rem; color: var(--accent); }
+    p.station { margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-sub); }
+
+    /* Main Status Card */
+    .status-card { background: var(--card-bg); border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .status-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-sub); }
+    .next-tide-type { font-size: 2rem; font-weight: bold; margin: 8px 0; color: var(--accent); }
+    .next-tide-time { font-size: 1.2rem; font-weight: 600; }
+    
+    /* Countdown Badge */
+    .badge { display: inline-block; background: rgba(72, 202, 228, 0.15); color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; margin-top: 10px; font-weight: bold; }
+
+    /* Tide List */
+    .list-container { background: var(--card-bg); border-radius: 16px; padding: 16px; }
+    .list-title { font-size: 1rem; margin-top: 0; margin-bottom: 12px; color: var(--text-sub); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+    
+    .tide-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .tide-row:last-child { border-bottom: none; }
+    
+    .tide-tag { padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
+    .tag-high { background: rgba(0, 180, 216, 0.2); color: var(--high-tide); }
+    .tag-low { background: rgba(255, 183, 3, 0.2); color: var(--low-tide); }
+    
+    .tide-details { text-align: right; }
+    .tide-time { font-size: 1rem; font-weight: 600; }
+    .tide-height { font-size: 0.8rem; color: #aaa; }
+
+    /* Map Link Button */
+    .map-btn { display: block; width: 100%; text-align: center; background: var(--accent); color: #000; font-weight: bold; text-decoration: none; padding: 14px; border-radius: 12px; transition: opacity 0.2s; }
+    .map-btn:active { opacity: 0.8; }
+
+    /* Loader */
+    .loader { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <h1>Boca Raton Tides</h1>
+      <p class="station">Boca Raton, Lake Boca Raton (NOAA 8722736)</p>
+    </header>
+
+    <div class="status-card">
+      <div class="status-title">Next Tide</div>
+      <div id="next-type" class="next-tide-type"><span class="loader"></span></div>
+      <div id="next-time" class="next-tide-time">Fetching live data...</div>
+      <div id="countdown" class="badge">--:--:--</div>
+    </div>
+
+    <div class="list-container">
+      <h3 class="list-title">Today's Tide Schedule</h3>
+      <div id="tide-list">
+        <div style="text-align:center; padding: 20px;"><span class="loader"></span></div>
+      </div>
+    </div>
+
+    <a href="https://maps.google.com/?q=Lake+Boca+Raton+FL" target="_blank" class="map-btn">
+      📍 View Boca Inlet Map
+    </a>
+  </div>
+
+  <script>
+    // Station ID for Lake Boca Raton, FL
+    const STATION_ID = "8722736";
+
+    // Format Date for NOAA API (YYYYMMDD)
+    function getFormattedDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2
