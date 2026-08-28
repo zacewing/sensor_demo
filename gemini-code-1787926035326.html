@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Teaching Drum Machine</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #1a1a24; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+    h1 { margin-bottom: 5px; color: #00d2ff; }
+    p.subtitle { color: #aaa; margin-top: 0; margin-bottom: 25px; font-size: 0.95rem; }
+    
+    .container { max-width: 800px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+    
+    /* Educational Banner */
+    .info-panel { background: #242438; border-left: 5px solid #00d2ff; padding: 15px 20px; border-radius: 4px; font-size: 0.95rem; line-height: 1.5; }
+    .info-panel strong { color: #00d2ff; }
+    
+    /* Drum Pads Section */
+    .pads-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    .pad { background: #2a2a3d; border: 2px solid #3d3d5c; border-radius: 10px; padding: 25px 10px; text-align: center; cursor: pointer; transition: all 0.1s ease; user-select: none; }
+    .pad:hover { background: #35354d; border-color: #00d2ff; }
+    .pad.active { background: #00d2ff; color: #111; transform: scale(0.96); box-shadow: 0 0 15px #00d2ff; }
+    .pad .key { font-size: 1.4rem; font-weight: bold; display: block; margin-bottom: 5px; }
+    .pad .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+    .pad.active .label { color: #222; }
+    
+    /* Sequencer Grid */
+    .sequencer { background: #242438; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .btn { background: #00d2ff; color: #111; border: none; padding: 10px 20px; font-weight: bold; border-radius: 5px; cursor: pointer; }
+    .btn:hover { background: #00a2c7; }
+    .track { display: flex; align-items: center; gap: 10px; }
+    .track-name { width: 80px; font-size: 0.85rem; font-weight: bold; color: #aaa; }
+    .steps { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; flex-grow: 1; }
+    .step { background: #1a1a24; height: 35px; border-radius: 4px; cursor: pointer; border: 1fr solid #333; }
+    .step.selected { background: #ff0055; }
+    .step.playing { border: 2px solid #fff; }
+    .step.selected.playing { background: #ff5599; }
+  </style>
+</head>
+<body>
+
+  <h1>Interactive Drum Machine</h1>
+  <p class="subtitle">Learn how HTML structure, CSS styling, and JavaScript audio work together</p>
+
+  <div class="container">
+    <div class="info-panel" id="edu-panel">
+      <strong>How It Works:</strong> Click a pad or press the matching key (<strong>A, S, D, F</strong>). JavaScript uses the <code>Web Audio API</code> to synthesis real drum sounds mathematically—no external audio files required!
+    </div>
+
+    <div class="pads-grid">
+      <div class="pad" id="pad-kick" onclick="playKick()" data-key="a">
+        <span class="key">A</span>
+        <span class="label">Kick</span>
+      </div>
+      <div class="pad" id="pad-snare" onclick="playSnare()" data-key="s">
+        <span class="key">S</span>
+        <span class="label">Snare</span>
+      </div>
+      <div class="pad" id="pad-hihat" onclick="playHiHat()" data-key="d">
+        <span class="key">D</span>
+        <span class="label">Hi-Hat</span>
+      </div>
+      <div class="pad" id="pad-clap" onclick="playClap()" data-key="f">
+        <span class="key">F</span>
+        <span class="label">Clap</span>
+      </div>
+    </div>
+
+    <div class="sequencer">
+      <div class="controls">
+        <button class="btn" id="play-btn" onclick="togglePlay()">Play Pattern</button>
+        <span style="font-size: 0.9rem; color: #aaa;">8-Step Sequencer (Loop)</span>
+      </div>
+      
+      <div class="track">
+        <span class="track-name">Kick</span>
+        <div class="steps" id="kick-steps"></div>
+      </div>
+      <div class="track">
+        <span class="track-name">Snare</span>
+        <div class="steps" id="snare-steps"></div>
+      </div>
+      <div class="track">
+        <span class="track-name">Hi-Hat</span>
+        <div class="steps" id="hihat-steps"></div>
+      </div>
+      <div class="track">
+        <span class="track-name">Clap</span>
+        <div class="steps" id="clap-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. WEB AUDIO API INITIALIZATION
+    // AudioContext allows generating raw audio frequencies directly in code.
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // 2. SOUND SYNTHESIS FUNCTIONS (Audio Math)
+    function playKick() {
+      triggerPadVisual('pad-kick');
+      updateEduText("<b>Kick Sound:</b> Built using an Oscillator lowering frequency rapidly from 150Hz to 0.01Hz (pitch drop) combined with a fast volume decay.");
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      
+      gain.gain.setValueAtTime(1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.5);
+    }
+
+    function playSnare() {
+      triggerPadVisual('pad-snare');
+      updateEduText("<b>Snare Sound:</b> Created by generating random Noise (white noise) passed through a high-pass filter, mixed with a quick tone.");
+
+      // Noise Buffer
+      const bufferSize = audioCtx.sampleRate * 0.2;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1; // Random values = Noise
+      }
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 1000;
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      noise.start();
+    }
+
+    function playHiHat() {
+      triggerPadVisual('pad-hihat');
+      updateEduText("<b>Hi-Hat Sound:</b> Uses filtered white noise with a very short envelope duration (0.05 seconds).");
+
+      const bufferSize = audioCtx.sampleRate * 0.05;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 7000; // High frequency for crispness
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      noise.start();
+    }
+
+    function playClap() {
+      triggerPadVisual('pad-clap');
+      updateEduText("<b>Clap Sound:</b> Uses multiple bursts of filtered noise played back-to-back in quick succession to simulate multiple hands clapping.");
+
+      const bufferSize = audioCtx.sampleRate * 0.3;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1200;
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.7, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      noise.start();
+    }
+
+    // 3. UI AND INTERACTION HELPERS
+    function triggerPadVisual(id) {
+      const pad = document.getElementById(id);
+      pad.classList.add('active');
+      setTimeout(() => pad.classList.remove('active'), 100);
+    }
+
+    function updateEduText(text) {
+      document.getElementById('edu-panel').innerHTML = text;
+    }
+
+    // Keydown Listener to map keyboard keys to sounds
+    window.addEventListener('keydown', (e) => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const key = e.key.toLowerCase();
+      if (key === 'a') playKick();
+      if (key === 's') playSnare();
+      if (key === 'd') playHiHat();
+      if (key === 'f') playClap();
+    });
+
+    // 4. SEQUENCER ENGINE (Loop Logic)
+    const tracks = ['kick', 'snare', 'hihat', 'clap'];
+    const sequenceData = { kick: [], snare: [], hihat: [], clap: [] };
+    let currentStep = 0;
+    let isPlaying = false;
+    let intervalId = null;
+
+    // Render Sequencer Grid Steps dynamically
+    tracks.forEach(track => {
+      const container = document.getElementById(`${track}-steps`);
+      for (let i = 0; i < 8; i++) {
+        const stepDiv = document.createElement('div');
+        stepDiv.classList.add('step');
+        stepDiv.addEventListener('click', () => {
+          stepDiv.classList.toggle('selected');
+        });
+        container.appendChild(stepDiv);
+      }
+    });
+
+    function togglePlay() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('play-btn');
+
+      if (isPlaying) {
+        btn.innerText = "Stop";
+        intervalId = setInterval(runSequencer, 200); // 150 BPM pace
+      } else {
+        btn.innerText = "Play Pattern";
+        clearInterval(intervalId);
+        clearStepHighlights();
+        currentStep = 0;
+      }
+    }
+
+    function runSequencer() {
+      clearStepHighlights();
+
+      tracks.forEach(track => {
+        const container = document.getElementById(`${track}-steps`);
+        const stepEl = container.children[currentStep];
+        stepEl.classList.add('playing');
+
+        if (stepEl.classList.contains('selected')) {
+          if (track === 'kick') playKick();
+          if (track === 'snare') playSnare();
+          if (track === 'hihat') playHiHat();
+          if (track === 'clap') playClap();
+        }
+      });
+
+      currentStep = (currentStep + 1) % 8;
+    }
+
+    function clearStepHighlights() {
+      document.querySelectorAll('.step').forEach(step => step.classList.remove('playing'));
+    }
+  </script>
+</body>
+</html>
