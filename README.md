@@ -1,6 +1,6 @@
-# sensor_demo
+# Sensor Net Demo Page 
 
-## subtitle 
+## Notes 
 
 * item 1
 * item 2
