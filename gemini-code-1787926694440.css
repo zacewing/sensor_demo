@@ -1,0 +1,31 @@
+* { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: #121212; color: #f0f0f0; margin: 0; padding: 20px; }
+
+header { text-align: center; margin-bottom: 20px; }
+h1 { color: #f32013; margin-bottom: 8px; }
+
+#progress-bar-container { width: 100%; max-width: 500px; height: 12px; background: #2a2a2a; border-radius: 6px; margin: 10px auto; overflow: hidden; }
+#progress-bar { width: 0%; height: 100%; background: #f32013; transition: width 0.3s ease; }
+
+.builder-container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+
+/* Parts Tray */
+.parts-bin { flex: 1 1 220px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 15px; }
+.parts-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+.part-item { background: #2a2a2a; border: 2px solid #444; padding: 12px; border-radius: 6px; cursor: grab; text-align: center; font-weight: bold; font-size: 0.9rem; user-select: none; }
+.part-item:hover { border-color: #f32013; background: #333; }
+.part-item.installed { opacity: 0.2; cursor: default; pointer-events: none; border-style: dashed; }
+
+/* Workspace */
+.workspace { flex: 2 1 450px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 15px; display: flex; justify-content: center; align-items: center; }
+.engine-assembly-bay { width: 100%; max-width: 600px; }
+
+/* Snap Targets and Installed Graphics */
+.snap-target { fill: none; stroke: #f32013; stroke-width: 2; stroke-dasharray: 4; transition: all 0.2s; }
+.snap-target.drag-over { fill: rgba(243, 32, 19, 0.2); stroke-dasharray: 0; }
+.installed-part { display: none; }
+.installed-part.visible { display: block; }
+
+/* Inspector */
+.info-sidebar { flex: 1 1 250px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 15px; }
+.info-sidebar h2 { color: #f32013; margin-top: 0; font-size: 1.2rem; }

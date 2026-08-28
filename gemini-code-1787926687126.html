@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EA888 Gen 3 Interactive Engine Builder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Audi EA888 Gen 3 Engine Builder</h1>
+    <div id="progress-bar-container">
+      <div id="progress-bar"></div>
+    </div>
+    <p id="assembly-status">Assembly Progress: 0 / 6 Parts Installed</p>
+  </header>
+
+  <main class="builder-container">
+    <section class="parts-bin">
+      <h2>Parts Tray</h2>
+      <p class="hint">Click or drag components into the correct position on the bare engine block.</p>
+      
+      <div class="parts-list">
+        <div class="part-item" draggable="true" data-part="head">
+          <span>Integrated Cylinder Head</span>
+        </div>
+        <div class="part-item" draggable="true" data-part="avs">
+          <span>Audi Valvelift Solenoids</span>
+        </div>
+        <div class="part-item" draggable="true" data-part="injection">
+          <span>Dual Injector Rail</span>
+        </div>
+        <div class="part-item" draggable="true" data-part="turbo">
+          <span>IHI IS20 Turbocharger</span>
+        </div>
+        <div class="part-item" draggable="true" data-part="thermal">
+          <span>Rotary Thermal Module</span>
+        </div>
+        <div class="part-item" draggable="true" data-part="chain">
+          <span>Timing Chain & Cover</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="engine-assembly-bay">
+        <svg id="engine-svg" viewBox="0 0 600 450">
+          <rect x="180" y="180" width="240" height="180" rx="8" fill="#2d2d2d" stroke="#555" stroke-width="3"/>
+          <text x="300" y="280" fill="#444" font-size="22" font-weight="bold" text-anchor="middle">2.0 TFSI BLOCK</text>
+
+          <rect id="target-head" class="snap-target" x="180" y="110" width="240" height="60" rx="4"/>
+          <rect id="target-avs" class="snap-target" x="200" y="70" width="200" height="30" rx="4"/>
+          <rect id="target-injection" class="snap-target" x="200" y="190" width="120" height="30" rx="4"/>
+          <rect id="target-turbo" class="snap-target" x="430" y="130" width="80" height="80" rx="4"/>
+          <rect id="target-thermal" class="snap-target" x="110" y="220" width="60" height="80" rx="4"/>
+          <rect id="target-chain" class="snap-target" x="425" y="180" width="30" height="170" rx="4"/>
+
+          <path id="installed-head" class="installed-part" d="M 180 110 L 420 110 L 420 170 L 180 170 Z" fill="#4a5568"/>
+          <rect id="installed-avs" class="installed-part" x="200" y="70" width="200" height="30" rx="3" fill="#e53e3e"/>
+          <rect id="installed-injection" class="installed-part" x="200" y="190" width="120" height="30" rx="3" fill="#dd6b20"/>
+          <circle id="installed-turbo" class="installed-part" cx="470" cy="170" r="35" fill="#3182ce"/>
+          <rect id="installed-thermal" class="installed-part" x="110" y="220" width="60" height="80" rx="4" fill="#319795"/>
+          <rect id="installed-chain" class="installed-part" x="425" y="180" width="30" height="170" rx="2" fill="#d69e2e"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="info-sidebar">
+      <h2>Assembly Inspector</h2>
+      <div id="inspector-content">
+        <p>Drag component parts onto their correct highlighted locations on the engine block to build the engine.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
